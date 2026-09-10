@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Lanjutan Penugasan JOSJIS 2026</title>
+    
+    <style>
+        /* ---------------------------------------------------------
+           VARIABLES & RESET (ISEKAI STATUS WINDOW)
+           --------------------------------------------------------- */
+        :root {
+            --primary: #00e5ff; 
+            --primary-gradient: linear-gradient(135deg, #00c6ff, #0072ff);
+            --primary-hover-gradient: linear-gradient(135deg, #33d1ff, #1a82ff);
+            
+            --status-icon-color: #00e5ff;
+            --status-icon-glow: rgba(0, 229, 255, 0.8);
+
+            --bg-body: #050814; 
+            --bg-card-gradient: linear-gradient(150deg, rgba(12, 20, 39, 0.75), rgba(6, 11, 24, 0.75));
+            --bg-tab-container: rgba(0, 60, 128, 0.5);
+            --input-panel-bg: rgba(0, 229, 255, 0.04);
+            --code-bg: rgba(4, 9, 20, 0.9); 
+            
+            --text-main: #f0f8ff; 
+            --text-muted: #8a9bb8; 
+            --border-color: rgba(0, 229, 255, 0.35); 
+            
+            --corner-size: 24px; 
+            --corner-offset: -12px;
+            
+            --gold-bg: linear-gradient(to top, rgb(140, 90, 20) 0%, rgb(190, 130, 40) 35%, rgb(235, 175, 60) 70%, rgb(255, 195, 85) 100%);
+            --gold-border: rgba(255, 195, 85, 0.95);
+            --gold-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 6px rgba(255, 195, 85, 0.6);
+            
+            --footer-bg: linear-gradient(145deg, rgba(10, 22, 46, 0.92), rgba(4, 8, 18, 0.96));
+            --grid-line: rgba(0, 229, 255, 0.06);
+            --bg-img-url: none;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(circle at 20% 15%, rgba(0, 229, 255, 0.12), transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(0, 114, 255, 0.1), transparent 45%),
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+            background-position: 0 0, 0 0, -1px -1px, -1px -1px;
+            background-attachment: fixed;
+            color: var(--text-main); padding: 2rem 1rem 0 1rem; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
+        }
+
+        body.bg-image-loaded {
+            background-image: linear-gradient(rgba(5, 8, 20, 0.55), rgba(5, 8, 20, 0.75)), var(--bg-img-url);
+            background-size: cover;
+            background-position: center 50%;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            will-change: background-position;
+        }
+
+        /* ---------------------------------------------------------
+           LOADING PANEL OVERLAY STYLES
+           --------------------------------------------------------- */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 8, 20, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 99999; display: flex; justify-content: center; align-items: center; padding: 1rem; transition: opacity 0.5s ease, visibility 0.5s ease; }
+        .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loading-content { max-width: 550px; width: 100%; text-align: center; margin-bottom: 0; animation: loadingGlowPulse 2.5s infinite ease-in-out; }
+
+        @keyframes loadingGlowPulse {
+            0%, 100% { box-shadow: 0 0 25px rgba(0, 229, 255, 0.35), 0 0 50px rgba(0, 229, 255, 0.15), 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.1); border-color: rgba(0, 229, 255, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.65), 0 0 80px rgba(0, 229, 255, 0.3), 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.85); }
+        }
+
+        .loading-header h2 { font-size: 1.25rem; color: var(--text-main); text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); margin-top: 1rem; margin-bottom: 0.5rem; letter-spacing: 0.5px; line-height: 1.4; }
+        .loading-status { font-size: 0.85rem; color: var(--text-muted); font-family: 'Courier New', Courier, monospace; margin-bottom: 1.25rem; text-shadow: 0 0 8px rgba(0, 229, 255, 0.3); }
+
+        .spinner { width: 48px; height: 48px; border: 3px solid rgba(0, 229, 255, 0.15); border-top: 3px solid var(--primary); border-radius: 50%; margin: 0 auto; animation: spin 1s linear infinite; box-shadow: 0 0 20px rgba(0, 229, 255, 0.7), inset 0 0 10px rgba(0, 229, 255, 0.3); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .tips-box { background: var(--input-panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.25rem; text-align: left; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05); }
+        .tips-title { font-size: 0.9rem; font-weight: 700; color: #facc15; margin-bottom: 0.5rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; text-shadow: 0 0 8px rgba(250, 204, 21, 0.5); }
+        .tips-box p { font-size: 0.9rem; color: var(--text-main); line-height: 1.5; }
+
+        /* ---------------------------------------------------------
+           MAIN CONTAINER & LAYOUT
+           --------------------------------------------------------- */
+        .calculator-container {
+            background: var(--bg-card-gradient); max-width: 850px; width: 100%; padding: 2.5rem; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.25);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3), 0 0 50px rgba(0, 229, 255, 0.15), 0 20px 40px -10px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(0, 229, 255, 0.08);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); margin-bottom: 3rem; position: relative; transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .calculator-container:hover { border-color: rgba(0, 229, 255, 0.65); box-shadow: 0 0 35px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.2), 0 20px 40px -10px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(0, 229, 255, 0.12); }
+
+        .header { text-align: center; margin: 0 auto; padding: 1.25rem 1rem; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.05), transparent); }
+        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(0, 229, 255, 0.5); }
+        .header p { color: var(--text-muted); font-size: 0.98rem; line-height: 1.5; margin: 0 auto; max-width: 90%; }
+
+        /* H1 = TABS */
+        .tabs { position: relative; z-index: 2; display: flex; background-color: var(--bg-tab-container); padding: 0.4rem; border-radius: 10px; margin-top: 1.5rem; margin-bottom: 1.5rem; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 0.5rem; }
+        .tab-btn { flex: 1 1 180px; padding: 0.75rem 1rem; text-align: center; background: transparent; border: none; border-radius: 8px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.25s ease; font-size: 0.95rem; }
+        .tab-btn:hover { color: #ffffff; background: var(--primary-hover-gradient); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
+        .tab-btn.active { background: var(--primary-gradient); color: #ffffff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* H2 = EXPANDABLE ACCORDION */
+        .accordion-item { background: var(--input-panel-bg); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; transition: all 0.3s ease;}
+        .accordion-header { padding: 1rem 1.25rem; background: rgba(0, 229, 255, 0.03); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.05rem; }
+        .accordion-header:hover { background: rgba(0, 229, 255, 0.08); color: var(--primary); }
+        .accordion-item.open .accordion-header .icon { transform: rotate(45deg); }
+        .accordion-body { display: none; padding: 1.25rem; border-top: 1px solid rgba(0, 229, 255, 0.15); font-size: 0.95rem; line-height: 1.6; }
+        .accordion-item.open .accordion-body { display: block; animation: fadeIn 0.3s ease-out; }
+
+        /* H3 & H4 */
+        h3.content-h3 { color: var(--primary); font-size: 1.1rem; margin-top: 1.2rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(0,229,255,0.2); padding-bottom: 0.25rem; }
+        h4.content-h4 { color: #facc15; font-size: 0.95rem; margin-top: 1rem; margin-bottom: 0.4rem; font-weight: bold; }
+
+        /* CUSTOM HIGHLIGHT & CONTAINER STYLES */
+        .callout-card {
+            background: rgba(0, 229, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-card {
+            background: rgba(248, 113, 113, 0.08);
+            border-left: 4px solid #f87171;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #fecaca;
+        }
+
+        .gold-card {
+            background: rgba(250, 204, 21, 0.06);
+            border-left: 4px solid #facc15;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .information-card {
+            background: rgba(21, 55, 250, 0.06);
+            border-left: 4px solid #0072ff;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        /* Added from v1 to support Checklist UI */
+        .sub-container-box {
+            background: rgba(5, 12, 28, 0.7);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05);
+        }
+
+        .badge-pill {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 0.4rem;
+        }
+
+        .badge-primary { background: rgba(0, 229, 255, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+        .badge-gold { background: rgba(250, 204, 21, 0.2); color: #facc15; border: 1px solid #facc15; }
+        .badge-alert { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: rgba(0, 229, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.25rem;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        .concept-card {
+            background: rgba(0, 229, 255, 0.03);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .concept-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .concept-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        
+        /* GIF CONTAINER LANDSCAPE 16:9 */
+        .standalone-gif { width: 100%; max-width: 500px; margin: 0.5rem auto 1rem auto; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); overflow: hidden; background: #000;}
+        .standalone-gif img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+
+        /* INTERACTIVE CHECKLIST STYLES DARI V1 */
+        .checklist-container {
+            background: rgba(0, 229, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin: 1.2rem 0;
+        }
+
+        .checklist-progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0.6rem 0 1rem 0;
+        }
+
+        .checklist-progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background: rgba(0, 229, 255, 0.08);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--primary);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            background: transparent;
+        }
+
+        .checklist-item input[type="checkbox"]:checked {
+            background: var(--primary);
+        }
+
+        .checklist-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #050814;
+            font-size: 13px;
+            font-weight: bold;
+            top: -2px;
+            left: 3px;
+        }
+
+        .checklist-item label {
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+            flex: 1;
+        }
+
+        ul, ol { margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+        li { margin-bottom: 0.4rem; }
+        .highlight { color: var(--primary); font-weight: bold; }
+        .alert-highlight { color: #f87171; font-weight: bold; }
+        code { background: var(--code-bg); color: var(--primary); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid var(--border-color); font-family: 'Courier New', Courier, monospace;}
+        
+        .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+        .data-table th, .data-table td { border: 1px solid rgba(0, 229, 255, 0.3); padding: 0.6rem; }
+        .data-table th { background: rgba(0, 229, 255, 0.1); color: var(--primary); text-align: left;}
+        
+        .corner-diamond { position: absolute; width: var(--corner-size); height: var(--corner-size); background: var(--gold-bg); border: 1.5px solid var(--gold-border); box-shadow: var(--gold-shadow); transform: rotate(45deg); z-index: 10; }
+        .c-tl { top: var(--corner-offset); left: var(--corner-offset); }
+        .c-tr { top: var(--corner-offset); right: var(--corner-offset); }
+        .c-bl { bottom: var(--corner-offset); left: var(--corner-offset); }
+        .c-br { bottom: var(--corner-offset); right: var(--corner-offset); }
+
+        .status-top-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin: -10px auto 15px auto; }
+        .status-top-circle { width: 6px; height: 6px; background: var(--status-icon-color); border-radius: 50%; box-shadow: 0 0 8px var(--status-icon-glow); transition: all 0.3s ease; }
+        .status-top-icon { width: 12px; height: 12px; background: var(--status-icon-color); transform: rotate(45deg); box-shadow: 0 0 8px var(--status-icon-glow); transition: all 0.3s ease; }
+        .status-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border-color), transparent); margin: 1.5rem 0; border: none; }
+
+        .quote-container { margin: 10px auto; padding: 1.25rem; text-align: center; max-width: 90%; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.03), transparent); }
+        .quote-text, .quote-author { transition: opacity 0.5s ease; }
+        .quote-text { font-size: 1.1rem; font-style: italic; color: var(--text-main); line-height: 1.5; }
+        .quote-author { display: block; margin-top: 8px; font-size: 0.85rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 0 8px rgba(0, 229, 255, 0.3); }
+
+        /* ---------------------------------------------------------
+           FOOTER
+           --------------------------------------------------------- */
+        .app-footer { 
+            background: var(--footer-bg); width: 100%; max-width: 850px; border-radius: 16px 16px 0 0; padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1.5rem; margin-top: auto; border: 1px solid rgba(0, 229, 255, 0.45); border-bottom: none; 
+            box-shadow: 0 -5px 25px rgba(0, 229, 255, 0.3), 0 -10px 40px rgba(0, 229, 255, 0.12), 0 -4px 20px rgba(0, 0, 0, 0.6); position: relative; backdrop-filter: blur(12px); transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .app-footer:hover { border-color: rgba(0, 229, 255, 0.65); box-shadow: 0 -8px 30px rgba(0, 229, 255, 0.4), 0 -12px 45px rgba(0, 229, 255, 0.18), 0 -4px 20px rgba(0, 0, 0, 0.6); }
+
+        .footer-logo { width: 100px; height: 100px; border-radius: 12px; object-fit: contain; flex-shrink: 0; }
+        .footer-content { display: flex; flex-direction: column; color: #ffffff; flex: 1; }
+        .f-line-1 { font-size: 0.9rem; margin-bottom: 0.2rem; opacity: 0.95; color: #93c5fd; }
+        .f-line-2 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 0.25rem; text-shadow: 0 0 10px rgba(0, 229, 255, 0.3); }
+        .f-line-3 { font-size: 0.85rem; margin-bottom: 0.4rem; opacity: 0.85; }
+        .f-line-4 { font-size: 0.75rem; font-weight: 600; color: #cbd5e1; }
+        .f-line-4 a { color: var(--primary); text-decoration: none; transition: all 0.2s ease; }
+        .f-line-4 a:hover { color: #ffffff; text-decoration: underline; text-shadow: 0 0 8px var(--primary); }
+
+        @media (max-width: 600px) {
+            .calculator-container { padding: 1.5rem 1rem; }
+            .app-footer { flex-direction: column; text-align: center; padding: 1.25rem; gap: 1rem; }
+            .tabs { flex-direction: column; }
+            .tab-btn { width: 100%; flex: auto; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .concept-grid { grid-template-columns: 1fr; }
+            .checklist-grid { grid-template-columns: 1fr; } 
+        }
+        /* ---------------------------------------------------------
+   BGM BUTTON STYLES
+   --------------------------------------------------------- */
+.bgm-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(5, 8, 20, 0.8);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+}
+
+.bgm-button:hover {
+    border-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+.bgm-button.active {
+    background: rgba(0, 229, 255, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+@media (max-width: 600px) {
+    .bgm-button {
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+}
+
+/* =========================================================
+   TAMBAHAN: GIF ZOOM (LIGHTBOX EFFECT)
+   ========================================================= */
+.standalone-gif {
+    /* Gaya bawaan Anda */
+    width: 100%; 
+    max-width: 500px; 
+    margin: 0.5rem auto 1rem auto; 
+    border-radius: 8px; 
+    border: 1px solid var(--border-color); 
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); 
+    overflow: hidden; 
+    background: #000;
+    
+    /* Tambahan untuk Zoom */
+    cursor: zoom-in;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    z-index: 1; /* Pastikan berada di bawah overlay saat normal */
+}
+
+.standalone-gif img { 
+    width: 100%; 
+    aspect-ratio: 16 / 9; 
+    object-fit: cover; 
+    display: block; 
+}
+
+/* Background gelap saat GIF di-zoom */
+#gif-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 8, 20, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    cursor: zoom-out;
+}
+
+#gif-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Tampilan GIF saat diperbesar (Zoomed-in) */
+.standalone-gif.zoomed {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;            /* Mengikuti lebar layar */
+    max-width: 1000px;      /* Batas maksimal pelebaran */
+    z-index: 9999;          /* Berada di paling depan */
+    cursor: zoom-out;
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), 0 0 80px rgba(0, 229, 255, 0.2);
+    margin: 0;
+}
+    </style>
+</head>
+<body>
+<div id="gif-overlay"></div>
+<div id="loading-panel" class="loading-overlay">
+    <div class="calculator-container loading-content">
+        <div class="corner-diamond c-tl"></div>
+        <div class="corner-diamond c-tr"></div>
+        <div class="corner-diamond c-bl"></div>
+        <div class="corner-diamond c-br"></div>
+
+        <div class="status-top-container">
+            <div class="status-top-circle"></div>
+            <div class="status-top-icon"></div>
+            <div class="status-top-circle"></div>
+        </div>
+
+        <div class="loading-header">
+            <div class="spinner"></div>
+            <h2>SYSTEM INITIALIZING</h2>
+            <div class="loading-status">Memeriksa & memuat aset panduan sistem...</div>
+        </div>
+
+        <div class="status-divider"></div>
+
+        <div class="tips-box">
+            <div class="tips-title">💡 TIPS PENGERJAAN</div>
+            <ol>
+                <li>Langkah pemecahan teka-teki tidak dijelaskan secara runtut. 
+                Oleh karena itu, telaah, pahami, analisis, dan hubungkan tiap bagian yang telah diberikan!</li>
+                <li>Tunjuk 3 orang yang masing-masing bertugas sebagai pengarah teka-teki, pengarah naskah, dan pengarah video.</li>
+                <li>Mengerjakan secara luring dan beramai-ramai.</li>
+                <li>Sediakan kertas dan alat tulis.</li>
+            </ol>
+        </div>
+
+        <div class="status-divider"></div>
+
+        <div class="status-top-container" style="margin: 15px auto 0 auto;">
+            <div class="status-top-circle"></div>
+            <div class="status-top-icon"></div>
+            <div class="status-top-circle"></div>
+        </div>
+    </div>
+</div>
+
+<div class="calculator-container">
+    <div class="corner-diamond c-tl"></div>
+    <div class="corner-diamond c-tr"></div>
+    <div class="corner-diamond c-bl"></div>
+    <div class="corner-diamond c-br"></div>
+
+    <div class="status-top-container">
+        <div class="status-top-circle"></div>
+        <div class="status-top-icon"></div>
+        <div class="status-top-circle"></div>
+    </div>
+
+    <div class="status-divider"></div>
+
+    <div class="header">
+        <h1>Panduan Penugasan JOSJIS</h1>
+        <p>Jogja Objectively: Spatial Journey for Inspiring Stories Ekskursi Geografi Lingkungan 2026</p>
+    </div>
+
+    <div class="callout-card" style="margin-top: 1.5rem;">
+        <span class="badge-pill badge-primary">ORIENTASI MISSION</span>
+        <p style="margin-top: 0.5rem; font-size: 0.93rem;">
+            Penugasan JOSJIS bertujuan menghasilkan video deskripsi dan analisis objek/fenomena geosfer 
+            di Daerah Istimewa Yogyakarta secara objektif berbasis ilmu geografi secara populer, komunikatif, dan edukatif yang nantinya dapat diaplikasikan oleh GEL Muda dalam KKL-1 Pengenalan Bentanglahan</p>
+            <br>
+        <span class="badge-pill badge-primary">ASPEK PENILAIAN </span>
+
+        <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">20%</div>
+            <div class="stat-label">Penyelesaian Teka-Teki</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">75%</div>
+            <div class="stat-label">Muatan Video Reels</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">5%</div>
+            <div class="stat-label">Engagement (Like, Share, Comment)</div>
+        </div>
+        </div>
+        <div class="gold-card">
+            <strong style="color: #facc15;"> 💡 TIPS PENGERJAAN</strong><br>
+                <ol>
+                <li>Tunjuk 3 orang yang masing-masing bertugas sebagai pengarah teka-teki, pengarah naskah, dan pengarah video.</li>
+                <li>Mengerjakan secara luring dan beramai-ramai.</li>
+                <li>Sediakan kertas dan alat tulis.</li>
+                </ol>
+            </div>
+        <div class="information-card">
+            <strong style="color: #ffffff;"> ℹ️ PENGUMUMAN</strong><br>
+                <ol>Dikarenakan beririsan dengan rangkaian kegiatan Dies Natalis Fakultas Geografi, terdapat beberapa perubahan linimasa pada penugasan JOSJIS. GEL MUDA diharap memperhatikan kembali perubahan tersebut di dalam dokumen ini.
+                </ol>
+                </div>
+    </div>
+
+
+    <div class="status-divider"></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchMainTab('tab-tekateki')" id="btn-tab-tekateki"><p>🧩</p><p>Menyelesaikan Teka-Teki</p></button>
+        <button class="tab-btn" onclick="switchMainTab('tab-kelompok')" id="btn-tab-kelompok"><p>🗺️</p><p>Kelompok dan Wilayah</p></button>
+        <button class="tab-btn" onclick="switchMainTab('tab-video')" id="btn-tab-video"><p>🎬</p><p>Pembuatan Video</p></button>
+        <button class="tab-btn" onclick="switchMainTab('tab-pic')" id="btn-tab-pic"><p>📡</p><p>Tanggal Penting, Konfirmasi, dan Helpdesk</p></button>
+    </div>
+
+    <div id="tab-tekateki" class="tab-content active">
+        
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Mengumpulkan Fragmen dan Membuka Scenario Paper</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="standalone-gif"><img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YTM1cXU5aTYxeW53anNrb2o4MDc2dmMya3VxbGJrY25lY2Q1MWE2ayZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/ddX1wXx32YYD4Yk3Aj/giphy.gif" alt="Fragment Data"></div>
+                
+                <h3 class="content-h3">Mengumpulkan Fragmen</h3>
+                <p>Setiap kelompok akan memperoleh <span class="highlight">29 fragmen informasi</span>. Setiap fragmen akan dibagikan secara acak kepada anggota kelompok melalui email. Setiap anggota akan menerima 1-2 email yang berisi fragmen yang berbeda sehingga seluruh anggota perlu mengumpulkan dan menggabungkan informasi yang diperoleh. Komposisi fragmen yang diterima setiap kelompok terdiri atas:</p>
+                <ul>
+                    <li><strong>1. Dua (2) dokumen Scenario Paper,</strong></li>
+                    <li><strong>2. Satu (1) tautan folder berisi dokumen pendukung;</strong></li>
+                    <li><strong>3. Satu (1) tautan folder berisi HTML kalkulator perbantuan;</strong></li>
+                    <li><strong>4. 25 fragmen informasi</strong> berupa teks maupun tautan.</li>
+                </ul>
+                <p>Setiap fragmen memiliki kode, klasifikasi, dan keterangan enkripsi untuk membantu identifikasi</p>
+
+                <div class="checklist-container">
+                    <h4 class="content-h4" style="margin-top: 0; color: var(--primary);">📋 Checklist Interaktif Fragmen Email & Data</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Gunakan checklist di bawah ini untuk memantau progres pengumpulan fragmen informasi secara real-time:</p>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.5rem; color: var(--primary);">
+                        <span>Progres Terkumpul</span>
+                        <span id="checklist-counter">0 / 29 Items (0%)</span>
+                    </div>
+                    <div class="checklist-progress-bar-bg">
+                        <div class="checklist-progress-bar-fill" id="checklist-progress"></div>
+                    </div>
+
+                    <div class="checklist-grid">
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-1" onchange="updateChecklistProgress()">
+                            <label for="chk-1">Dokumen Pendukung</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-2" onchange="updateChecklistProgress()">
+                            <label for="chk-2">Dokumen Rumus dan Kalibrasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-3" onchange="updateChecklistProgress()">
+                            <label for="chk-3">Dokumen Rumus dan Kalibrasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-4" onchange="updateChecklistProgress()">
+                            <label for="chk-4">Dokumen Skenario</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-5" onchange="updateChecklistProgress()">
+                            <label for="chk-5">Dokumen Skenario</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-6" onchange="updateChecklistProgress()">
+                            <label for="chk-6">Folder Alat Bantu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-7" onchange="updateChecklistProgress()">
+                            <label for="chk-7">Folder Dokumen Pendukung</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-8" onchange="updateChecklistProgress()">
+                            <label for="chk-8">Keterangan Bangunan Sasaran</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-9" onchange="updateChecklistProgress()">
+                            <label for="chk-9">Keterangan Koordinat</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-10" onchange="updateChecklistProgress()">
+                            <label for="chk-10">Keterangan Koordinat</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-11" onchange="updateChecklistProgress()">
+                            <label for="chk-11">Keterangan Lokasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-12" onchange="updateChecklistProgress()">
+                            <label for="chk-12">Keterangan Lokasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-13" onchange="updateChecklistProgress()">
+                            <label for="chk-13">Keterangan Skenario Jelajah</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-14" onchange="updateChecklistProgress()">
+                            <label for="chk-14">Keterangan Skenario Jelajah</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-15" onchange="updateChecklistProgress()">
+                            <label for="chk-15">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-16" onchange="updateChecklistProgress()">
+                            <label for="chk-16">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-17" onchange="updateChecklistProgress()">
+                            <label for="chk-17">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-18" onchange="updateChecklistProgress()">
+                            <label for="chk-18">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-19" onchange="updateChecklistProgress()">
+                            <label for="chk-19">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-20" onchange="updateChecklistProgress()">
+                            <label for="chk-20">Keterangan Waktu</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-21" onchange="updateChecklistProgress()">
+                            <label for="chk-21">Konfigurasi Emulator</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-22" onchange="updateChecklistProgress()">
+                            <label for="chk-22">Konfigurasi Emulator</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-23" onchange="updateChecklistProgress()">
+                            <label for="chk-23">Password Dokumen Rumus dan Kalibrasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-24" onchange="updateChecklistProgress()">
+                            <label for="chk-24">Password Dokumen Rumus dan Kalibrasi</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-25" onchange="updateChecklistProgress()">
+                            <label for="chk-25">Password Dokumen Skenario</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-26" onchange="updateChecklistProgress()">
+                            <label for="chk-26">Password Dokumen Skenario</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-27" onchange="updateChecklistProgress()">
+                            <label for="chk-27">Password Folder Dokumen Pendukung</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-28" onchange="updateChecklistProgress()">
+                            <label for="chk-28">Skema Konfigurasi Emulator</label>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheckItem(this, event)">
+                            <input type="checkbox" id="chk-29" onchange="updateChecklistProgress()">
+                            <label for="chk-29">Skema Konfigurasi Emulator</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sub-container-box">
+                    <h3 class="content-h3" style="margin-top: 0;">Contoh Email</h3>
+                    <p style="margin-bottom: 0.8rem;">Berikut adalah 3 struktur sampel email fragmen teka-teki yang telah diterima oleh peserta:</p>
+                    
+                    <div class="standalone-gif">
+                        <img src="/Properties/Asset/mail1.png" alt="Contoh Email Fragmen">
+                    </div>
+                    <div class="standalone-gif">
+                        <img src="/Properties/Asset/mail2.png" alt="Contoh Email Fragmen">
+                    </div>
+                    <div class="standalone-gif">
+                        <img src="/Properties/Asset/mail3.png" alt="Contoh Email Fragmen">
+        
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Menggunakan Emulator</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+               <div class="standalone-gif"><img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExamhtZWNoeThzZmdjcnVlZWZld2p1cnAwcHZ4MWU0YnhnaXNjeGJkcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/077i6AULCXc0FKTj9s/giphy.gif" alt="Email Config"></div>
+               
+                <p>Sebelum mulai memecahkan informasi yang terenkripsi, pastikan semua petunjuk yang diperlukan sudah terkumpul. 
+                    Mesin Enigma membutuhkan input atau konfigurasi yang sangat spesifik agar pesan dapat diterjemahkan dengan tepat dan tidak menjadi rangkaian huruf/angka acak.</p>
+                
+                <h3 class="content-h3">Informasi yang Diperlukan</h3>
+                <p>Untuk menjalankan emulator, siapkan dua informasi utama berikut:</p>
+                
+                <h4 class="content-h4">1. Email Konfigurasi</h4>
+                <p>Email ini memuat data teknis terkait pengaturan mesin, yang mencakup <strong>Pengaturan Rotor</strong> (terdiri dari 3 karakter) dan <strong>Plugboard Pairs</strong> (pasangan karakter). Sebagai contoh, sebuah email berisi konfigurasi:</p>
+                <div class="callout-card">
+                    <p style="font-size: 0.88rem;">
+                        <strong>Konfigurasi A:</strong> Rotor <code>JOS</code> dan Plugboard <code>2026</code>.
+                    </p>
+                </div>
+                <p>Maka isian rotor adalah <code>J</code> untuk rotor kiri, <code>O</code> untuk rotor tengah, <code>S</code> untuk rotor kanan, dan <code>20 26</code> pada plugboard pairs.<br>Pastikan pada plugboard pairs diberi spasi antar dua (2) karakter.</p>
+
+                <h4 class="content-h4">2. Email Skema Konfigurasi</h4>
+                <p>Email ini berfungsi sebagai petunjuk alur pemecahan sandi. Informasi ini akan menentukan konfigurasi mana yang harus digunakan terlebih dahulu (misalnya, apakah cukup menggunakan Konfigurasi A saja, atau harus diproses berurutan dari Konfigurasi B lalu ke Konfigurasi A).</p>
+                
+                <h3 class="content-h3">Menjalankan Emulator (Proses Dekripsi 1 Tahap)</h3>
+                <p>Gunakan cara ini jika instruksi pada Email Skema Konfigurasi hanya membutuhkan satu kali proses pemecahan. Sebagai contoh penggunaan Konfigurasi A:</p>
+                <ol>
+                    <li><strong>Atur Rotor:</strong> Masukkan 3 karakter pengaturan ke kolom Rotor Kiri, Tengah, dan Kanan. Ketik huruf <code>J</code> di Kiri, <code>O</code> di Tengah, dan <code>S</code> di Kanan.</li>
+                    <li><strong>Atur Plugboard:</strong> Ketik pasangan karakter Plugboard di kolom yang disediakan. Ketik <code>20 25</code> (pastikan menyisipkan spasi untuk memisahkan setiap dua karakter).</li>
+                    <li><strong>Masukkan Pesan:</strong> Salin teks sandi atau koordinat rahasia yang ditemukan, kemudian tempel (paste) ke dalam kotak Input Pesan.</li>
+                    <li><strong>Eksekusi:</strong> Klik tombol <strong>Dekripsi / Enkripsi</strong>.</li>
+                    <li><strong>Salin Hasil:</strong> Perhatikan kotak <em>Output Sandbox</em> di bagian bawah layar. Pesan asli akan muncul pada kotak tersebut. Klik ikon atau tombol "Copy" di sudut kanan atas kotak untuk menyalin teks secara otomatis. Notifikasi "Tersalin!" akan muncul jika proses penyalinan berhasil.</li>
+                </ol>
+                <div class="standalone-gif"><img src="https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif" alt="Decrypt 1"></div>
+                
+                <h3 class="content-h3">Menjalankan Emulator (Proses Dekripsi 2 Tahap)</h3>
+                <p>Gunakan langkah-langkah ini jika Email Skema Konfigurasi menginstruksikan pemecahan sandi secara berlapis. Sebagai contoh, sebuah email menginstruksikan skema pemecahan: "Pesan Terenkripsi &rarr; Konfigurasi B &rarr; Hasil Tahap 1 &rarr; Konfigurasi A &rarr; Hasil Akhir".</p>
+                
+                <h4 class="content-h4">Proses Dekripsi Tahap 1:</h4>
+                <ol>
+                    <li><strong>Atur Mesin (Konfigurasi Pertama):</strong> Masukkan pengaturan untuk Konfigurasi B terlebih dahulu. Misalnya, konfigurasinya adalah rotor = JIS dan plugboard pair-nya = 2025, maka masukkan Rotor <code>J</code>, <code>I</code>, <code>S</code> dan Plugboard <code>20 25</code>.</li>
+                    <li><strong>Masukkan Pesan:</strong> Salin dan tempel teks sandi awal ke dalam kotak Input Pesan.</li>
+                    <li><strong>Eksekusi:</strong> Klik tombol <strong>Dekripsi / Enkripsi</strong>.</li>
+                    <li><strong>Simpan Hasil:</strong> Serangkaian karakter acak baru akan muncul di kotak <em>Output </em>. Klik tombol <strong>Copy</strong> untuk menyalin hasil Dekripsi Tahap 1. (Catatan: Pada tahap ini, pesan rahasia belum sepenuhnya terpecahkan).</li>
+                </ol>
+        
+                <h4 class="content-h4">Proses Dekripsi Tahap 2:</h4>
+                <ol>
+                    <li><strong>Bersihkan Pengaturan Mesin:</strong> Klik tombol <strong>Reset</strong> pada emulator untuk mengosongkan semua pengaturan sebelumnya.</li>
+                    <li><strong>Atur Mesin (Konfigurasi Kedua):</strong> Masukkan pengaturan untuk Konfigurasi A. Masukkan Rotor <code>J</code>, <code>O</code>, <code>S</code> dan Plugboard <code>20 26</code>.</li>
+                    <li><strong>Masukkan Pesan Lanjutan:</strong> Tempel (paste) hasil Dekripsi Tahap 1 yang sudah disalin sebelumnya ke dalam kotak Input Pesan.</li>
+                    <li><strong>Eksekusi Akhir:</strong> Klik kembali tombol <strong>Dekripsi / Enkripsi</strong>.</li>
+                    <li><strong>Hasil Akhir:</strong> Periksa kembali kotak <em>Output</em>. Pesan asli kini sudah bisa dibaca dengan jelas. Jangan lupa catat atau klik tombol <strong>Copy</strong> untuk memindahkannya ke dokumen lain</li>
+                </ol>
+                <div class="standalone-gif"><img src="https://media.giphy.com/media/DHqth0hVQoIzS/giphy.gif" alt="Decrypt 2-2"></div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Membedah Scenario Paper</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="standalone-gif"><img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aDRremNxaXB6MXlnazA5ZGFtOHFyMW5lb3J3N2dlamJmNjk2c3IzbyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/DsSGqmFFrp7GuqQjig/giphy.gif" alt="Bedah Dokumen"></div>
+                
+                <h3 class="content-h3">Informasi yang Diperlukan</h3>
+                <p>Dokumen Scenario Paper berisi informasi yang telah disensor (redacted). Tugas kelompok adalah melakukan unredacting, yaitu memulihkan informasi yang hilang dengan menggunakan/mengolah informasi dalam fragmen yang telah dibagikan dengan cara:</p>
+                <ol>
+                    <li><strong>Pengumpulan dan Konsolidasi Data:</strong> Langkah pertama yang harus dilakukan adalah mengumpulkan seluruh fragmen informasi dan email yang diterima oleh setiap anggota kelompok.</li>
+                    <li><strong>Identifikasi Kode:</strong> Setelah mengumpulkan data, langkah selanjutnya adalah memeriksa dokumen Scenario Paper/yang lainnya secara menyeluruh. Kelompok harus menghubungkan kode identifikasi pada dokumen dengan kode dalam fragmen tersebut.</li>
+                    <li><strong>Pemetaan Kode dengan Email:</strong> Gunakan kode identifikasi yang telah ditemukan pada untuk mencari email atau informasi yang berkaitan dengan kode tersebut.</li>
+                </ol>
+
+                <h3 class="content-h3">Eksekusi Pemulihan (Unredacting)</h3>
+                <p>Email yang ditemukan dapat berisi berbagai jenis format informasi. Berikut adalah prosedur berdasarkan jenis informasi yang ditemukan:</p>
+                <div class="callout-card">
+                    <ul>
+                        <li><strong class="highlight">A. Informasi Langsung (Direct Information):</strong> Jika email berisi informasi yang jelas dan tidak terenkripsi informasi tersebut dapat digunakan secara langsung untuk me-unredacting bagian yang disensor pada dokumen.</li>
+                        <li><strong class="highlight">B. Dokumen Pendukung Terkunci (Locked Documents):</strong> Untuk fragmen informasi atau dokumen yang masih terkunci, harus dicari dan dicocokkan dengan email lain yang berisi password (kata sandi) yang sesuai sehingga informasinya dapat diakses.</li>
+                        <li><strong class="highlight">C. Informasi Terenkripsi (Encrypted Information):</strong> Untuk fragmen informasi yang memiliki keterangan terenkripsi, tim tidak dapat langsung menggunakannya. Diperlukan proses untuk mendekripsikan informasi tersebut terlebih dahulu sesuai dengan instruksi atau petunjuk dekripsi yang telah disediakan menggunakan emulator sesuai dengan bagian sebelumnya.</li>
+                    </ul>
+                </div>
+
+                <h3 class="content-h3">Mencatat Data Hasil Bedah Scenario Paper</h3>
+                <p>Langkah terakhir dan yang paling krusial adalah mencatat data hasil bedah Scenario Paper.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Mengolah Data dalam Kalkulator</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="standalone-gif"><img src="https://github.com/user-attachments/assets/cb1f4533-b6b4-40bc-bef2-955e29ea97e8" alt="Kalkulator"></div>
+                
+                <h3 class="content-h3">1. Kalkulator Skenario Episenter Gelombang Seismik</h3>
+                <p>Kalkulator ini dirancang untuk menentukan lokasi pusat gempa (episenter) dengan mengkalkulasi selisih waktu rambat antara dua jenis gelombang seismik.</p>
+                
+                <table class="data-table">
+                    <tr>
+                        <th>Data Masukan (Input) Parameter</th>
+                        <th>Keterangan Simbol</th>
+                    </tr>
+                    <tr><td>Selisih waktu tiba gelombang P dan S</td><td>Waktu Tempuh (S-P)</td></tr>
+                    <tr><td>Kecepatan Gelombang P (Primer)</td><td>Kecepatan Primer</td></tr>
+                    <tr><td>Kecepatan Gelombang S (Sekunder)</td><td>Kecepatan Sekunder</td></tr>
+                    <tr><td style="color: #facc15;"><strong>Hasil Keluaran (Output)</strong></td><td><strong>Jarak episenter gempa dalam kilometer (km) dan meter (m).</strong></td></tr>
+                </table>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-muted);"><em>Catatan Penting: Nilai jarak yang dihasilkan oleh kalkulator ini selanjutnya akan digunakan sebagai nilai radius lingkaran.</em></p>
+
+                <h3 class="content-h3">2. Kalkulator Skenario Jelajah Rudal dan Wahana Udara</h3>
+                <p>Kalkulator kedua digunakan untuk skenario melibatkan jangkauan operasional objek terbang seperti rudal atau wahana udara dalam satuan waktu tertentu.</p>
+                
+                <table class="data-table">
+                    <tr>
+                        <th>Data Masukan (Input)</th>
+                    </tr>
+                    <tr><td>Waktu jelajah</td></tr>
+                    <tr><td>Parameter jelajah</td></tr>
+                    <tr><td style="color: #facc15;"><strong>Hasil Keluaran (Output): Jarak jelajah.</strong></td></tr>
+                </table>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-muted);"><em>Catatan Penting: Nilai jarak yang dihasilkan oleh kalkulator ini selanjutnya akan digunakan sebagai nilai radius lingkaran.</em></p>
+
+                <h3 class="content-h3">Menjalankan Kalkulator</h3>
+                <p>Untuk menjalankan kalkulator dengan benar, pastikan mengikuti langkah-langkah di bawah ini:</p>
+                <ol>
+                    <li><strong>Siapkan Data Masukan:</strong> Pastikan seluruh parameter yang disyaratkan sudah berhasil dipulihkan pada tahap unredacting sebelumnya.</li>
+                    <li><strong>Buka Modul HTML:</strong> Buka file HTML kalkulator perbantuan yang terdapat di dalam Folder Alat Bantu menggunakan peramban web (browser).</li>
+                    <li><strong>Input Data:</strong> Masukkan nilai-nilai yang sesuai ke dalam kolom isian (field) kalkulator. Pastikan tidak ada kesalahan satuan.</li>
+                    <li><strong>Eksekusi:</strong> Tekan tombol hitung pada kalkulator dan catat hasil keluaran (radius dalam satuan km dan m).</li>
+                    <li><strong>Kalibrasi: Pastikan kembali apakah hasil akhir perlu dikalibrasi dengan menambahkan nilai tertentu berdasarkan fragmen yang terkait.</strong></li>
+                    <li><strong class="alert-highlight">Screenshot untuk dilampirkan saat konfirmasi.</strong></li>
+                </ol>
+                <div class="standalone-gif"><img src="https://github.com/user-attachments/assets/3091a4d9-fbc7-49c0-bf0b-4ea307927977" alt="Kalkulator"></div>
+                
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Data Entry dan Digitizing pada Geojson</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="standalone-gif"><img src="https://github.com/user-attachments/assets/3fd434d7-5a4a-45ba-862b-5da75ec934bb" alt="Kalkulator"></div>
+            
+                <h3 class="content-h3">Data yang Diperlukan</h3>
+                <p>Tahap ini merupakan proses visualisasi hasil akhir dari pengumpulan fragmen dan perhitungan kalkulator. Pada tahap ini, akan melakukan digitizing data spasial untuk memetakan radius gempa dan area jelajah wahana udara.</p>
+                
+                <h4 class="content-h4">Persiapan Data</h4>
+                <p>Sebelum memulai, pastikan Anda telah mengantongi dua informasi krusial dari hasil bedah Scenario Paper sebelumnya:</p>
+                <ul>
+                    <li><strong>Koordinat (Latitude dan Longitude).</strong></li>
+                    <li><strong>Jarak / Radius (Hasil dari kalkulator perbantuan).</strong></li>
+                </ul>
+                <p>Platform yang digunakan: <a href="https://geojson.io/" target="_blank" style="color: var(--primary);">https://geojson.io/</a></p>
+
+                <h3 class="content-h3">Proses Entry dan Digitizing</h3>
+
+                <h4 class="content-h4">Langkah 1: Membuat Lingkaran Random</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/json1.gif" alt="Draw Random Circle"></div>
+                <ul>
+                    <li>Buka situs geojson.io pada peramban (browser) Anda.</li>
+                    <li>Pada drawing tools di bagian atas peta, klik ikon dropdown di sebelah ikon lingkaran, lalu pilih tipe lingkaran <strong>Mercator</strong>.</li>
+                </ul>
+                <div class="standalone-gif"><img src="/Properties/Asset/json2.gif" alt="Draw Random Circle"></div>
+                <ul>
+                    <li>Setelah muncul notifikasi "Click and drag to draw a circle", klik dan tarik kursor di sembarang tempat pada peta untuk membuat sebuah lingkaran awal.</li>
+                    <li>Lepas Kursor hingga lingkaran tidak berubah-ubah saat mouse digerakkan.</li>
+                </ul>
+
+                <h4 class="content-h4">Langkah 2: Membuka Panel Titik Pusat Lingkaran</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/json3.gif" alt="Panel Titik Pusat"></div>
+                <ul>
+                    <li>Akan muncul panel Feature Editor di sisi kanan (atau bawah), lalu buka tab <strong>Properties</strong>.</li>
+                    <li>Cari baris dengan Name <code>@circle</code> yang memiliki Value <code>{"type": "Mercator", ...}</code>.</li>
+                    <li>Klik ikon tanda panah / edit pada Value tersebut untuk membuka panel detail JSON.</li>
+                </ul>
+
+                <h4 class="content-h4">Langkah 3: Memasukkan Koordinat Titik Lingkaran</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/json4.gif" alt="Input Koordinat"></div>
+                <ul>
+                    <li>Pada tab JSON yang terbuka, masukkan angka <strong>Longitude</strong> dan <strong>Latitude</strong> yang sudah didapatkan dari proses membedah Scenario Paper.</li>
+                    <li>Setelah data dipastikan akurat, simpan perubahan dengan mengklik tombol <strong>Done</strong>.</li>
+                </ul>
+
+                <h4 class="content-h4">Langkah 4: Memasukkan Nilai Radius</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/json5.gif" alt="Input Radius"></div>
+                <ul>
+                    <li>Beralih ke tab <strong>Circle</strong> di dalam panel Feature Editor.</li>
+                    <li>Pada kolom "Radius in mercator meters", masukkan nilai <strong>Jarak (Radius)</strong> yang telah diperoleh dari skenario atau hasil kalkulator.</li>
+                    <li>Lingkaran pada peta akan otomatis berpindah ke titik koordinat dan menyesuaikan ukurannya setelah nilai radius dimasukkan.</li>
+                </ul>
+                <div class="gold-card">
+                    <strong>⚠️ Perhatian:</strong> Jika terdapat kesalahan (format/nilai) pada input Latitude atau Longitude di langkah sebelumnya, menu tab "Circle" ini tidak akan muncul. Pastikan koordinat dimasukkan dengan benar.
+                </div>
+
+                <h3 class="content-h3">Mengunduh File Hasil Digitizing</h3>
+                <h4 class="content-h4">Mengekspor File Hasil Digitizing</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/json6.gif" alt="Export Geojson"></div>
+                <ul>
+                    <li>Setelah koordinat dan radius sesuai, klik menu <strong>Export</strong> di di menu bar atas.</li>
+                    <li>Kemudian akan terbuka panel export.</li>
+                    <li>Pilih format file <strong>KML</strong>.</li>
+                    <li>Klik tombol export</li>
+                </ul>
+                <div class="standalone-gif"><img src="/Properties/Asset/json7.gif" alt="Export Geojson"></div>
+                <ul>
+                    <li>beri nama dan lokasi file yang representatif, dan simpan (save) ke dalam perangkat.</li>
+                    <li><strong>Ulangi seluruh prosedur untuk data scenario case selanjutnya!</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Merge File dan Mengungkap Wilayah di Google Earth</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Data yang Diperlukan</h3>
+                <p>Tahapan ini bertujuan untuk menggabungkan (merge) data KML yang telah dibuat pada tahap digitizing sebelumnya ke dalam platform Google Earth. 
+                    Dari penggabungan ini, GEL Muda akan menemukan titik perpotongan dua (2) lingkaran yang mengacu pada wilayah untuk penugasa JOSJIS.</p>
+                <p>Persiapkan <strong>dua (2) file kml</strong> dari proses digitasi.</p>
+
+                <h3 class="content-h3">Merge File Hasil Digitizing</h3>
+                
+                <h4 class="content-h4">Membuat Proyek Baru</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/ge1.gif" alt="New Project Google Earth"></div>
+                <ol>
+                    <li>Buka: <a href="https://earth.google.com/web" target="_blank" style="color: var(--primary);">https://earth.google.com/web</a>.</li>
+                    <li>Klik menu <strong>+ Baru</strong>.</li>
+                    <li>Klik <strong>project peta baru</strong>.</li>
+                </ol>
+
+                <h4 class="content-h4">Menambahkan Konten Peta</h4>
+                <div class="standalone-gif"><img src="/Properties/Asset/ge2.gif" alt="Import Google Earth"></div>
+                <p>Setelah proyek dibuat, langkah selanjutnya adalah memasukkan file KML yang berisi radius dan koordinat:</p>
+                <ol>
+                    <li>Pilih ikon <strong>+</strong> pada menu proyek.</li>
+                    <li>Pilih opsi <strong>Impor file</strong>.</li>
+                    <li>Pilih <strong>Upload dari perangkat</strong>, lalu cari file .kml yang sudah didownload dari Geojson.io.</li>
+                    <div class="standalone-gif"><img src="/Properties/Asset/ge3.gif" alt="Import Google Earth pt2"></div>
+                    <li>Upload file .kml tersebut</li>
+                    <li>Klik "fitur peta" dan klik <strong>selesai</strong>.</li>
+                    <div class="standalone-gif"><img src="/Properties/Asset/ge4.gif" alt="Done"></div>
+                    <li>Ulangi langkah-langkah di atas untuk memasukkan file KML kedua.</li>
+                </ol>
+
+                <h3 class="content-h3">Menentukan Wilayah untuk Deskripsi/Analisis</h3>
+                <h4 class="content-h4">Konsep Titik Perpotongan:</h4>
+                <p>Kedua lingkaran koordinat yang dimuat di Google Earth dirancang secara khusus untuk menghasilkan <strong>dua titik perpotongan</strong>. Tugas utama GEL Muda adalah mengidentifikasi kedua titik tersebut pada peta dan menentukan titik mana yang sesuai dengan tipe bangunan acuan yang tercantum dalam Scenario Paper.</p>
+
+                <h4 class="content-h4">Klasifikasi Bangunan Acuan & Tingkat Wilayah</h4>
+                <p>Informasi mengenai tipe bangunan acuan diperoleh dari hasil unredacting (pemulihan) Scenario Paper. Bangunan ini menentukan tingkatan administratif wilayah kajian:</p>
+
+                <table class="data-table">
+                    <tr>
+                        <th>Kategori Bangunan</th>
+                        <th>Contoh Bangunan Acuan</th>
+                        <th>Representasi Wilayah Kajian</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Layanan Kesehatan</strong></td>
+                        <td>RSU (Rumah Sakit Umum), Puskesmas</td>
+                        <td>Kabupaten/Kota (RSU) atau Kecamatan (Puskesmas)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kepolisian</strong></td>
+                        <td>Polres, Polsek</td>
+                        <td>Kabupaten/Kota (Polres) atau Kecamatan (Polsek)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Militer</strong></td>
+                        <td>Kodim, Koramil</td>
+                        <td>Kabupaten/Kota (Kodim) atau Kecamatan (Koramil)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kompleks/Bangunan Pemerintahan</strong></td>
+                        <td>Kantor Dinas, Kompleks Pemda, KUA, Kantor Kapanewon</td>
+                        <td>Kabupaten/Kota (Dinas/Pemda) atau Kecamatan (KUA/ Kapanewon)</td>
+                    </tr>
+                </table>
+
+                <div class="sub-container-box">
+                    <h3 class="content-h3" style="margin-top: 0;">Contoh Penentuan</h3>
+                    <div class="standalone-gif">
+                        <img src="https://github.com/user-attachments/assets/accaca6a-3b04-401e-9bb8-3b61ccc09643" alt="Contoh Perpotongan Spasial">
+                    </div>
+
+                    <div class="callout-card">
+                        <p>Sebagai ilustrasi, asumsikan hasil input KML menunjukkan salah satu titik perpotongan berada di sekitar <strong>RSUD Situbondo</strong>.</p>
+                        <p>Jika petunjuk pada dokumen menyebutkan bangunan acuannya adalah Rumah Sakit Umum Daerah (RSUD), maka wilayah kajian yang ditetapkan adalah tingkat <strong>Kabupaten Situbondo</strong>.</p>
+                    </div>
+                </div>
+                <div class="alert-card">
+                    <strong>Jangan lupa screenshot</strong> perpotongan lingkaran yang mengacu pada bangunan acuan untuk dilampirkan saat konfirmasi
+                </div>
+                <div class="standalone-gif">
+                        <img src="https://github.com/user-attachments/assets/964b65ce-9602-4793-b10b-4dd2e449e8eb" alt="Contoh Perpotongan Spasial">
+                    
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="tab-kelompok" class="tab-content">
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Pembagian Kelompok</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Struktur dan Keanggotaan Kelompok</h3>
+                <p>Satu (1) kelompok penugasan JOSJIS terdiri atas gabungan peserta dari <span class="highlight">dua (2) kepemanduan yang berbeda</span>. Seluruh anggota kelompok wajib berkontribusi aktif dan terlibat penuh dalam setiap tahapan pengerjaan penugasan, baik penyelesaian teka-teki maupun pembuatan video.</p>
+
+                <h3 class="content-h3">Daftar Pasangan Kepemanduan</h3>
+                <p>Berikut adalah 5 kombinasi pasangan kepemanduan penugasan JOSJIS 2026:</p>
+                
+                <table class="data-table">
+                    <tr>
+                        <th>No</th>
+                        <th>Kepemanduan A</th>
+                        <th>Kepemanduan B</th>
+                    </tr>
+                    <tr><td>1</td><td>Antropogenik 🏗️</td><td>Aeolin ⛱️</td></tr>
+                    <tr><td>2</td><td>Denudasional 🌦️</td><td>Fluvial 💧</td></tr>
+                    <tr><td>3</td><td>Glasial 🧊</td><td>Marine 🌊</td></tr>
+                    <tr><td>4</td><td>Organik 🪸</td><td>Solusional 🐚</td></tr>
+                    <tr><td>5</td><td>Struktural ⛰️</td><td>Vulkanik 🌋</td></tr>
+                </table>
+
+                <p>Setiap kelompok GEL Muda dialokasikan ke dalam suatu wilayah di Daerah Istimewa Yogyakarta.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Mengajukan Pergantian Wilayah</span><span class="icon">+</span>
+            </div>
+        <div class="accordion-body">
+                <h3 class="content-h3">Syarat dan Ketentuan Pengajuan Pergantian Wilayah</h3>
+                <p>Apabila suatu kelompok merasa wilayah yang diperoleh kurang sesuai dengan pertimbangan, baik dalam hal jarak, atau objek yang akan dibahas, kelompok diperbolehkan mengajukan pergantian wilayah dengan ketentuan berikut:</p>
+                <div class="alert-card">
+                    <ul style="margin-left: 1rem;">
+                        <li><span class="alert-highlight">Pengecualian:</span> Ketentuan pergantian wilayah ini TIDAK BERLAKU bagi kelompok yang sejak awal memperoleh wilayah kajian di dalam wilayah administrasi Kota Yogyakarta.</li>
+                        <li>Wilayah pengganti TIDAK BOLEH berada di dalam wilayah administrasi Kota Yogyakarta maupun di luar Daerah Istimewa Yogyakarta (DIY).</li>
+                        <li>Wilayah pengganti TIDAK BOLEH tumpang tindih dengan wilayah kajian yang telah dimiliki oleh kelompok lain.</li>
+                        <li>Wilayah pengganti yang diajukan idealnya berbatasan langsung dengan wilayah awal yang terungkap.</li>
+                    </ul>
+                </div>
+
+                <h3 class="content-h3">Mekanisme Persetujuan & Ambang Batas</h3>
+                <p>Pengajuan pergantian wilayah kajian hanya sah jika disepakati melalui mekanisme Voting atau Musyawarah Resmi dengan memenuhi dua ambang batas persetujuan berikut:</p>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">≥ 60%</div>
+                        <div class="stat-label">Persetujuan Total Anggota Kelompok</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">≥ 55%</div>
+                        <div class="stat-label">Persetujuan Anggota Per Kepemanduan</div>
+                    </div>
+                </div>
+
+                <h3 class="content-h3">Prosedur Pengajuan ke PIC Penugasan</h3>
+                <ol>
+                    <li>Kelompok dianjurkan berkonsultasi terlebih dahulu dengan Dimas Diajeng Kepemanduan sebelum mengajukan.</li>
+                    <li>PIC Kelompok mengirimkan berkas permohonan ke PIC Penugasan via Email/WhatsApp dengan melampirkan wilayah awal, wilayah pengganti, alasan teknis, serta bukti screenshot voting atau foto musyawarah.</li>
+                    <li><strong>Masa Pengajuan:</strong> 10 – 25 September 2026 (Jam Ideal: 05.00–21.00 WIB).</li>
+                    <li><strong>Batas Akhir Pengajuan:</strong> Jumat, 25 September 2026 pukul 21.00 WIB.</li>
+                    <li>Pergantian wilayah baru dianggap <strong>SAH dan FINAL</strong> setelah mendapat konfirmasi resmi tertulis dari PIC Penugasan. Setelah disetujui, kelompok tidak dapat mengajukan pergantian ulang atau kembali ke wilayah awal.</li>
+                    <li>PIC Penugasan berhak menolak permohonan dengan alasan yang tidak dapat diganggu gugat. Kelompok tetap dapat mengajukan alternatif wilayah lain selama belum ada permohonan yang disetujui.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-video" class="tab-content">
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Menentukan Pendekatan dan Fokus Deskripsi/Analisis</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                
+                <h3 class="content-h3">Landasan Kajian Geografi (IGI)</h3>
+                <p>Isi video merupakan hasil deskripsi dan/atau analisis terhadap objek, sistem, atau fenomena geosfer di wilayah kajian dengan mengombinasikan elemen-elemen keilmuan geografi berdasarkan standar Ikatan Geograf Indonesia (IGI). Tidak seluruh elemen harus dimasukkan, pilih yang paling relevan dengan objek bahasan.</p>
+
+                <h4 class="content-h4">🧭 3 Pendekatan Utama Geografi</h4>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <div class="concept-title">📍 Keruangan (Spasial)</div>
+                        <p style="font-size: 0.85rem;">Menganalisis lokasi fenomena, persebaran spasial, faktor pendorong persebaran, serta interaksi fenomena dengan ruang sekitarnya.</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="concept-title">🌿 Kelingkungan (Ekologi)</div>
+                        <p style="font-size: 0.85rem;">Menganalisis hubungan timbal balik antara aktivitas manusia dan lingkungan fisik serta dampak ekologis yang ditimbulkan.</p>
+                    </div>
+                    <div class="concept-card">
+                        <div class="concept-title">🗺️ Kewilayahan (Regional)</div>
+                        <p style="font-size: 0.85rem;">Menganalisis komparasi karakteristik antarwilayah untuk mengidentifikasi keunikan, potensi, maupun permasalahan khas daerah.</p>
+                    </div>
+                </div>
+
+                <h4 class="content-h4">🧩 10 Konsep Esensial Geografi</h4>
+                <div class="concept-grid">
+                    <div class="concept-card"><div class="concept-title">📍 Lokasi</div><p style="font-size:0.82rem;">Letak absolut/relatif fenomena dan signifikansi spasialnya.</p></div>
+                    <div class="concept-card"><div class="concept-title">📏 Jarak</div><p style="font-size:0.82rem;">Pemisah ruang antarobjek, biaya, serta waktu tempuh.</p></div>
+                    <div class="concept-card"><div class="concept-title">🚶 Keterjangkauan</div><p style="font-size:0.82rem;">Kemudahan akses lokasi via jaringan transportasi/fisik.</p></div>
+                    <div class="concept-card"><div class="concept-title">🔷 Pola</div><p style="font-size:0.82rem;">Bentuk persebaran (mengelompok, memanjang, menyebar).</p></div>
+                    <div class="concept-card"><div class="concept-title">⛰️ Morfologi</div><p style="font-size:0.82rem;">Bentuk permukaan bumi (dataran, perbukitan, lembah).</p></div>
+                    <div class="concept-card"><div class="concept-title">🏘️ Aglomerasi</div><p style="font-size:0.82rem;">Kecenderungan konsentrasi aktivitas/fasilitas dalam ruang.</p></div>
+                    <div class="concept-card"><div class="concept-title">🔗 Keterkaitan Keruangan</div><p style="font-size:0.82rem;">Hubungan sebab-akibat antarfenomena dalam ruang.</p></div>
+                    <div class="concept-card"><div class="concept-title">🌏 Diferensiasi Areal</div><p style="font-size:0.82rem;">Karakteristik unik yang membedakan satu wilayah dengan wilayah lain.</p></div>
+                    <div class="concept-card"><div class="concept-title">🤝 Interaksi & Interdependensi</div><p style="font-size:0.82rem;">Hubungan ketergantungan antarwilayah (aliran barang/jasa).</p></div>
+                    <div class="concept-card"><div class="concept-title">💡 Nilai Guna</div><p style="font-size:0.82rem;">Manfaat potensi sumber daya wilayah bagi manusia.</p></div>
+                </div>
+
+                <h4 class="content-h4">🌎 5 Lapisan Fenomena Geosfer</h4>
+                <div class="concept-grid">
+                    <div class="concept-card"><div class="concept-title">🪨 Litosfer</div><p style="font-size:0.82rem;">Batuan, tanah, bentanglahan, dan struktur geologi/vulkanisme.</p></div>
+                    <div class="concept-card"><div class="concept-title">💧 Hidrosfer</div><p style="font-size:0.82rem;">Perairan darat, laut, air tanah, dan siklus hidrologi.</p></div>
+                    <div class="concept-card"><div class="concept-title">🌦️ Atmosfer</div><p style="font-size:0.82rem;">Cuaca, iklim, suhu, curah hujan, dan dinamika udara.</p></div>
+                    <div class="concept-card"><div class="concept-title">🌱 Biosfer</div><p style="font-size:0.82rem;">Persebaran flora/fauna dan tatanan ekosistem.</p></div>
+                    <div class="concept-card"><div class="concept-title">👥 Antroposfer</div><p style="font-size:0.82rem;">Dinamika kependudukan, budaya, ekonomi, dan tutupan lahan.</p></div>
+                </div>
+
+                <h3 class="content-h3">Menentukan Fokus Pembahasan</h3>
+                <p>Objek atau fenomena spesifik yang diangkat dapat memilih salah satu atau kombinasi topik berikut:</p>
+                <ul>
+                    <li>Bentuklahan dan dinamika geomorfologi.</li>
+                    <li>Risiko, mitigasi, dan manajemen bencana regional.</li>
+                    <li>Karakteristik kependudukan dan dinamika sosial-demografi.</li>
+                    <li>Penggunaan lahan (land use) dan tutupan lahan (land cover).</li>
+                    <li>Pengelolaan Daerah Aliran Sungai (DAS) dan hidrologi.</li>
+                    <li>Geografi bentang budaya, sejarah geologi, serta potensi ekonomi kewilayahan.</li>
+                    <li>Serta objek atau fenomena lain yang dapat dideskripsikan/dianalisis dalam kacamata geografi.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Pengumpulan Informasi dan Penyusunan Naskah</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="standalone-gif"><img src="https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif" alt="Naskah"></div>
+                
+                <h3 class="content-h3">Metode Pengumpulan Informasi Data</h3>
+                <p>Informasi pendukung deskripsi/analisis wajib dikumpulkan melalui sumber sahih dan terpercaya:</p>
+                <ul>
+                    <li>Interpretasi citra pengindraan jauh atau peta tematik resmi.</li>
+                    <li>Data statistik resmi pemerintah (BPS, Pemda, Kementerian).</li>
+                    <li>Literatur ilmiah terakreditasi, berita terpercaya, atau jurnal geografi.</li>
+                    <li>Wawancara narasumber lokal dan dokumentasi foto/video lapangan.</li>
+                </ul>
+
+                <h3 class="content-h3">Gaya Penulisan Naskah Video</h3>
+                <p>Naskah disusun menggunakan gaya bahasa yang <strong>kasual, komunikatif, dan populer</strong>, tetapi wajib mempertahankan akurasi ilmiah, etika akademis, serta terhindar dari klaim subjektif tanpa data.</p>
+
+                <div class="alert-card">
+                    <h4 class="content-h4" style="margin-top:0; color:#f87171;">⚠️ ATURAN DAN BATASAN PENGGUNAAN AI GENERATIF</h4>
+                    <p>Penggunaan AI Generatif (seperti ChatGPT, Claude, Gemini, dll.) <strong>HANYA DIPERBOLEHKAN</strong> untuk membantu menguraikan konsep ide dasar atau menstrukturkan kerangka naskah yang sudah ada.</p>
+                    <p style="margin-top:0.4rem;"><strong>DILARANG</strong> menggunakan AI generatif untuk menghasilkan data, melakukan analisis wilayah, ataupun membuat naskah video secara keseluruhan! Kelompok yang diduga dan terbukti melanggar batasan AI akan dikenai sanksi pelanggaran penugasan JOSJIS 2026.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Proses Pengambilan Gambar dan Suara</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Ketentuan Pengambilan Audio Visual Fieldwork</h3>
+                <p>Materi audio-visual yang digunakan dalam video dapat diproduksi secara mandiri maupun bersumber dari pustaka media eksternal yang relevan dengan topik bahasan.</p>
+
+                <div class="callout-card">
+                    <ul>
+                        <li><strong class="highlight">Opsi Perjalanan Lapangan:</strong> TIDAK ADA KEWAJIBAN bagi GEL Muda untuk merekam gambar/suara secara langsung ke lokasi kajian (fieldwork).</li>
+                        <li><strong class="highlight">Prosedur Izin Lapangan:</strong> Jika kelompok berencana melakukan perekaman langsung di lokasi kajian, wajib menginformasikan dan melapor terlebih dahulu kepada Dimas Diajeng Kepemanduan atau PIC Penugasan.</li>
+                    </ul>
+                </div>
+
+                <div class="alert-card">
+                    <strong>📵 BATASAN AI GENERATIF:</strong> DILARANG menggunakan suara (AI voiceover/synthetic voice), gambar, ilustrasi, atau komponen audio-visual apapun yang dibuat atau dihasilkan oleh mesin AI generatif!
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Penyuntingan Video</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Ketentuan Format & Durasi Video</h3>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">2 Video</div>
+                        <div class="stat-label">Jumlah Video Per Kelompok</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">1 – 3 Min</div>
+                        <div class="stat-label">Durasi Masing-Masing Video</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">≥ 5 Min</div>
+                        <div class="stat-label">Total Durasi Gabungan 2 Video</div>
+                    </div>
+                </div>
+
+                <h3 class="content-h3">Aspek-aspek Teknis Editing</h3>
+                <ul>
+                    <li><strong>Rasio Layar:</strong> Portrait <span class="highlight">9:16</span> (Format Instagram Reels).</li>
+                    <li><strong>Proporsi Keanggotaan:</strong> Keterlibatan anggota dari kedua kepemanduan harus seimbang/proporsional di kedua video yang dibuat.</li>
+                    <li><strong>Konsistensi Visual:</strong> Menjaga keseragaman konsep visual, gaya tipografi, dan elemen grafis antarvideo dalam satu kelompok agar memiliki identitas seragam.</li>
+                    <li><strong>Elemen Teks:</strong> Wajib menyertakan <span class="highlight">Subtitle</span> (teks narasi/dialog) dan <span class="highlight">Footnote</span> (keterangan sumber data, gambar, peta, atau literatur yang muncul di layar).</li>
+                </ul>
+
+                <h3 class="content-h3">Ketentuan Credit & Sitasi Video</h3>
+                <p>Credit dan sitasi dapat disajikan menggunakan teknik Overlay Credit maupun Rolling Credit di bagian akhir video (durasi credit tidak dihitung dalam batas durasi 1-3 menit video).</p>
+                <ul>
+                    <li><strong>Muatan Credit:</strong> Nama anggota kelompok beserta rincian tugas/kontribusinya, serta nama Dimas dan Diajeng Kepemanduan.</li>
+                    <li><strong>Sitasi Referensi:</strong> Daftar pustaka/sitasi dapat dipadatkan menjadi sebuah bentuk <strong>QR Code</strong> yang mengarah ke tautan berkas referensi.</li>
+                    <li><strong>Penggunaan Emoji Kepemanduan:</strong> Setiap nama anggota pada credit video WAJIB disertai emoji sesuai kepemanduan asalnya:</li>
+                </ul>
+
+                <table class="data-table">
+                    <tr>
+                        <th>Kepemanduan</th>
+                        <th>Emoji</th>
+                        <th>Nama Resmi Emoji (Unicode)</th>
+                    </tr>
+                    <tr><td>Antropogenik</td><td>🏗️</td><td>Building Construction</td></tr>
+                    <tr><td>Aeolin</td><td>⛱️</td><td>Umbrella on Ground</td></tr>
+                    <tr><td>Denudasional</td><td>🌦️</td><td>Sun Behind Rain Cloud</td></tr>
+                    <tr><td>Fluvial</td><td>💧</td><td>Droplet</td></tr>
+                    <tr><td>Glasial</td><td>🧊</td><td>Ice</td></tr>
+                    <tr><td>Marine</td><td>🌊</td><td>Water Wave</td></tr>
+                    <tr><td>Organik</td><td>🪸</td><td>Coral</td></tr>
+                    <tr><td>Solusional</td><td>🐚</td><td>Spiral Shell</td></tr>
+                    <tr><td>Struktural</td><td>⛰️</td><td>Mountain</td></tr>
+                    <tr><td>Vulkanik</td><td>🌋</td><td>Volcano</td></tr>
+                </table>
+                <div class="standalone-gif"><img src="/Properties/Asset/credit.png" alt="Naskah"></div>
+                
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Pengunggahan Video</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Ketentuan Pengunggahan di Instagram</h3>
+                <ul>
+                    <li>Diunggah melalui platform Instagram dalam bentuk berkas <strong>Reels</strong>.</li>
+                    <li>Menggunakan fitur kolaborasi <span class="highlight">Collab Reels</span> yang menyertakan akun resmi masing-masing kepemanduan asal anggota.</li>
+                    <li><strong>Sampul Reels (Cover):</strong> Sekurang-kurangnya memuat judul/tema kajian wilayah serta nama kelompok kepemanduan yang terlibat.</li>
+                    <li><strong>Takarir (Caption):</strong> Menjunjung etika akademis, dapat menyertakan ringkasan/hook menarik, serta <strong>WAJIB me-mention akun <code>@gelugm2026</code></strong>. Penggunaan tagar (hashtag) disesuaikan agar relevan dan tidak berlebihan.</li>
+                </ul>
+
+                <div class="gold-card">
+                    <h4 class="content-h4" style="margin-top:0;">📅 TANGGAL DAN JENDELA WAKTU RILIS REELS</h4>
+                    <p style="font-size: 1.1rem; font-weight: bold;">Video ke-1 : Jumat, 13 November 2026 | Pukul 16.00 – 21.00 WIB<br>Video ke-2 : Jumat, 27 November 2026 | Pukul 16.00 – 21.00 WIB</p>
+                </div>
+
+                <h3 class="content-h3">Prosedur Konfirmasi Pengunggahan</h3>
+                <p>Setelah Reels berhasil diunggah secara publik, salah satu perwakilan kelompok wajib mengirimkan email konfirmasi ke <code>ekskursigel2026@gmail.com</code> dengan format resmi yang tertera pada Tab Helpdesk.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-pic" class="tab-content">
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Narahubung</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Layanan Helpdesk & PIC Penugasan JOSJIS</h3>
+                <p>Apabila terdapat pertanyaan, kendala teknis, konfirmasi, maupun keperluan lainnya yang terkait penugasan JOSJIS 2026, GEL Muda dapat menghubungi PIC Penugasan JOSJIS setiap hari pada jam operasional:</p>
+                
+                <div class="callout-card">
+                    <p style="margin-bottom: 0.5rem;"><strong>⏰ Jam Operasional:</strong> Setiap Hari, Pukul 05.00 – 21.00 WIB</p>
+                    <ul style="margin-left: 1rem;">
+                        <li>📧 <strong>Email:</strong> <code>ekskursigel2026@gmail.com</code></li>
+                        <li>💬 <strong>WhatsApp:</strong> <code>082143401890</code> (a.n. Wildan Basayef H)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Konfirmasi Teka-Teki Wilayah</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="gold-card">
+                    <h4 class="content-h4" style="margin-top:0;">📅 TANGGAL DAN JENDELA WAKTU</h4>
+                    <ol>
+                    <li><strong>Masa Konfirmasi:</strong> 10 – 25 September 2026 (Jam Ideal: 05.00–21.00 WIB).</li>
+                    <li><strong>Batas Akhir Konfirmasi:</strong> Jumat, 25 September 2026 pukul 21.00 WIB.</li>
+                    </ol>
+                </div>
+                <h3 class="content-h3">Format Email / Chat Konfirmasi Wilayah Terungkap</h3>
+                <p>Gunakan format berikut saat mengajukan konfirmasi keberhasilan teka-teki wilayah kajian:</p>
+                
+                <div class="callout-card">
+                    <p><strong>Subjek Email / Judul Chat:</strong><br>
+                    <code>Konfirmasi Teka-Teki Wilayah Kelompok [Nama Kepemanduan A - Nama Kepemanduan B]</code></p>
+                    <br>
+                    <p><strong>Isi Pesan:</strong><br>
+                    1. Nama Wilayah Kajian Terungkap: (misal: Kapanewon Panggang, Kabupaten Gunungkidul)<br>
+                    2. Nama Bangunan Acuan: (misal: Puskesmas Panggang)<br>
+                    3. Lampiran Berkas Wajib:<br>
+                    - Screenshot titik perpotongan kedua lingkaran di Google Earth yang merujuk pada bangunan acuan.<br>
+                    - Screenshot hasil kalkulator seismik.<br>
+                    - Screenshot hasil kalkulator jelajah.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Permohonan Pergantian Wilayah</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="gold-card">
+                    <h4 class="content-h4" style="margin-top:0;">📅 TANGGAL DAN JENDELA WAKTU</h4>
+                    <ol>
+                    <li><strong>Masa Pengajuan:</strong> 10 – 25 September 2026 (Jam Ideal: 05.00–21.00 WIB).</li>
+                    <li><strong>Batas Akhir Pengajuan:</strong> Jumat, 25 September 2026 pukul 21.00 WIB.</li>
+                    </ol>
+                </div>
+                <h3 class="content-h3">Format Email / Chat Permohonan Pergantian Wilayah</h3>
+                <p>Gunakan format berikut apabila kelompok mengajukan permohonan pergantian lokasi kajian:</p>
+                
+                <div class="callout-card">
+                    <p><strong>Subjek Email / Judul Chat:</strong><br>
+                    <code>Permohonan Penggantian Wilayah Kelompok [Nama Kepemanduan A - Nama Kepemanduan B]</code></p>
+                    <br>
+                    <p><strong>Isi Pesan:</strong><br>
+                    1. Wilayah Awal: (Wilayah hasil teka-teki)<br>
+                    2. Wilayah Pengganti yang Diajukan: (Nama wilayah pengganti baru)<br>
+                    3. Alasan Pertimbangan Pergantian: (Uraikan pertimbangan akademis/logistik)<br>
+                    4. Persentase Persetujuan: (Sebutkan % voting total & % per kepemanduan)<br>
+                    5. Lampiran: Screenshot rekap voting ATAU Foto bukti kegiatan musyawarah kelompok.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Konfirmasi Pengunggahan Reels</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <div class="gold-card">
+                    <h4 class="content-h4" style="margin-top:0;">📅 TANGGAL DAN JENDELA WAKTU</h4>
+                    <ol>
+                    <li><strong>Unggah Video:</strong> Video ke-1 : Jumat, 13 November 2026 | Pukul 16.00 – 21.00 WIB<br>Video ke-2 : Jumat, 27 November 2026 | Pukul 16.00 – 21.00 WIB</li>
+                    <li><strong>Batas Akhir Konfirmasi:</strong> Sabtu, 28 November 2026 pukul 21.00 WIB.</li>
+                    </ol>
+                </div>
+                <h3 class="content-h3">Format Email Pengumpulan & Konfirmasi Reels Video</h3>
+                <p>Kirimkan email konfirmasi publikasi Reels paling lambat pada Rabu, 18 November 2026 pukul 21.00 WIB:</p>
+                
+                <div class="callout-card">
+                    <p><strong>Subjek Email:</strong><br>
+                    <code>Pengumpulan Video Josjis Kelompok [Nama Kepemanduan A - Nama Kepemanduan B]</code></p>
+                    <br>
+                    <p><strong>Isi Pesan:</strong><br>
+                    1. Tautan Publikasi Instagram Reels Video 1 & Video 2.<br>
+                    2. Tautan Drive/Lampirkan Dokumen Pembagian Tugas Detail Per Anggota Kelompok (Sesuai nama & emoji kepemanduan).<br>
+                    3. Tautan Drive/Lampirkan Dokumen Daftar Pustaka.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Pertanyaan dan Kendala</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Format Pertanyaan dan Kendala Teknis</h3>
+                <p>Gunakan format berikut jika memiliki pertanyaan atau persoalan teknis lainnya:</p>
+                
+                <div class="callout-card">
+                    <p><strong>Subjek Email / Judul Chat:</strong><br>
+                    <code>Pertanyaan dan Kendala Kelompok [Nama Kepemanduan A - Nama Kepemanduan B]</code></p>
+                    <br>
+                    <p><strong>Isi Pesan:</strong><br>
+                    1. Deskripsi Pertanyaan/Kendala yang Dialami.<br>
+                    2. Lampiran Pendukung.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Format Lainnya</span><span class="icon">+</span>
+            </div>
+            <div class="accordion-body">
+                <h3 class="content-h3">Keperluan Lainnya</h3>
+                <p>Apabila terdapat keperluan di luar kategori yang sudah ada, gunakan format pesan terstruktur:</p>
+
+                <div class="callout-card">
+                    <p>Gunakan subjek email/judul pesan secara ringkas dan spesifik menggambarkan topik utama 
+                        (misal: <code>Permohonan Perpanjangan Waktu Penyelesaian Teka-Teki - Kelompok [Nama Kepemanduan]</code>). 
+                        Selalu sertakan rincian serta berkas pendukung agar pesan tersampaikan secara jelas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-divider"></div>
+
+    <div class="quote-container">
+        <div class="quote-text" id="sys-quote">"Loading system message..."</div>
+        <div class="quote-author" id="sys-author"></div>
+    </div>
+
+    <div class="status-divider"></div>
+
+    <div class="status-top-container" style="margin: 15px auto 0 auto;">
+        <div class="status-top-circle"></div>
+        <div class="status-top-icon"></div>
+        <div class="status-top-circle"></div>
+    </div>
+</div>
+
+<div class="app-footer">
+    <div class="corner-diamond c-tl"></div>
+    <div class="corner-diamond c-tr"></div>
+
+    <img src="/Properties/Asset/ftrlogo.png" alt="Logo Ekskursi" class="footer-logo" onerror="this.style.display='none'">
+
+    <div class="footer-content">
+        <div class="f-line-1">Jogja Objectively: Spatial Journey for Inspiring Story - JOSJIS</div>
+        <div class="f-line-2">EKSKURSI GEOGRAFI LINGKUNGAN 2026</div>
+        <div class="f-line-3">LARASKALA: Laraskan Asa, Rangkai Karsa, Bersama Arungi Semesta</div>
+        <div class="f-line-4">🧭 Concept and Design by PIC Penugasan, Member of <a href="https://www.instagram.com/materipusyink" target="_blank">Divisi Materi Ekskursi 2026</a></div>
+    </div>
+
+    <img src="/Properties/Asset/ftrmascot.png" alt="Terravix" class="footer-logo" onerror="this.style.display='none'">
+</div>
+
+<audio id="bgm-video" loop autoplay muted>
+    <source src="/Properties/Asset/bgm.MP3" type="audio/mpeg">
+    Browser Anda tidak mendukung elemen audio.
+</audio>
+
+<button id="mute-btn" onclick="toggleBGM()" class="bgm-button">
+    🔊 Aktifkan Musik
+</button>
+
+<script>
+    // ---------------------------------------------------------
+    // SISTEM EFEK PARALLAX SANGAT MULUS
+    // ---------------------------------------------------------
+    let isTicking = false;
+
+    function updateParallax() {
+        if (!document.body.classList.contains('bg-image-loaded')) {
+            isTicking = false;
+            return;
+        }
+
+        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const scrollFraction = Math.min(1, Math.max(0, scrolled / maxScroll));
+
+        const yPercent = 10 + (scrollFraction * 80);
+        document.body.style.backgroundPosition = `center ${yPercent.toFixed(2)}%`;
+        isTicking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!isTicking) {
+            window.requestAnimationFrame(updateParallax);
+            isTicking = true;
+        }
+    }, { passive: true });
+
+    // ---------------------------------------------------------
+    // LOADING & BACKGROUND
+    // ---------------------------------------------------------
+    function initBackgroundAndLoading() {
+        const bgImageUrl = 'Properties/Asset/bg.png';
+        
+        const startTime = Date.now();
+        const minDisplayDuration = 2000;
+        const bgImg = new Image();
+
+        const closeLoadingAndApplyBg = (isSuccess) => {
+            const elapsedTime = Date.now() - startTime;
+            const remainingDelay = Math.max(0, minDisplayDuration - elapsedTime);
+
+            setTimeout(() => {
+                if (isSuccess) {
+                    document.body.style.setProperty('--bg-img-url', `url('${bgImageUrl}')`);
+                    document.body.classList.add('bg-image-loaded');
+                    updateParallax();
+                }
+
+                const loadingPanel = document.getElementById('loading-panel');
+                if (loadingPanel) loadingPanel.classList.add('hidden');
+            }, remainingDelay);
+        };
+
+        bgImg.onload = () => closeLoadingAndApplyBg(true);
+        bgImg.onerror = () => closeLoadingAndApplyBg(false);
+        bgImg.src = bgImageUrl;
+    }
+
+    // ---------------------------------------------------------
+    // ACCORDION & TABS
+    // ---------------------------------------------------------
+    function switchMainTab(tabId) {
+        const tabs = ['tab-tekateki', 'tab-kelompok', 'tab-video', 'tab-pic'];
+        tabs.forEach(id => {
+            const content = document.getElementById(id);
+            const btn = document.getElementById('btn-' + id);
+            if (id === tabId) {
+                content.classList.add('active');
+                btn.classList.add('active');
+            } else {
+                content.classList.remove('active');
+                btn.classList.remove('active');
+            }
+        });
+
+        const allAccordions = document.querySelectorAll('.accordion-item');
+        allAccordions.forEach(el => el.classList.remove('open'));
+
+        setTimeout(() => window.requestAnimationFrame(updateParallax), 50);
+    }
+
+    function toggleAccordion(headerEl) {
+        const item = headerEl.parentElement;
+        const container = item.parentElement;
+        const allItems = container.querySelectorAll('.accordion-item');
+        const isOpen = item.classList.contains('open');
+        
+        allItems.forEach(el => el.classList.remove('open'));
+        if (!isOpen) {
+            item.classList.add('open');
+            // Menambahkan fitur scroll ke atas saat accordion terbuka dengan delay yang menyesuaikan animasi CSS
+            setTimeout(() => {
+                headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+        
+        setTimeout(() => window.requestAnimationFrame(updateParallax), 250);
+    }
+
+    // ---------------------------------------------------------
+    // INTERACTIVE CHECKLIST SYSTEM LOGIC & LOCALSTORAGE
+    // ---------------------------------------------------------
+    function saveChecklistState() {
+        const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        const state = {};
+        checkboxes.forEach(chk => {
+            state[chk.id] = chk.checked;
+        });
+        localStorage.setItem('josjisChecklist29', JSON.stringify(state));
+    }
+
+    function loadChecklistState() {
+        const stateStr = localStorage.getItem('josjisChecklist29');
+        if (stateStr) {
+            try {
+                const state = JSON.parse(stateStr);
+                for (const id in state) {
+                    const chk = document.getElementById(id);
+                    if (chk) chk.checked = state[id];
+                }
+            } catch (e) {
+                console.error("Gagal memuat progres checklist", e);
+            }
+        }
+        updateChecklistProgress();
+    }
+
+    function toggleCheckItem(itemEl, ev) {
+        const chk = itemEl.querySelector('input[type="checkbox"]');
+        // Mencegah double trigger jika user menekan langsung checkbox
+        if (ev && ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'LABEL') {
+            chk.checked = !chk.checked;
+        }
+        updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+        const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        const total = checkboxes.length;
+        let checked = 0;
+        checkboxes.forEach(chk => { if (chk.checked) checked++; });
+
+        const percentage = total === 0 ? 0 : Math.round((checked / total) * 100);
+        document.getElementById('checklist-counter').innerText = `${checked} / ${total} Items (${percentage}%)`;
+        document.getElementById('checklist-progress').style.width = `${percentage}%`;
+        
+        // Simpan progres ke LocalStorage setiap kali ada pembaruan
+        saveChecklistState();
+    }
+
+    // ---------------------------------------------------------
+    // BGM VIDEO LOGIC
+    // ---------------------------------------------------------
+    function toggleBGM() {
+    const video = document.getElementById('bgm-video');
+    const btn = document.getElementById('mute-btn');
+    video.volume = 0.5;
+    if (video.muted) {
+        video.muted = false;
+        video.play(); // TAMBAHKAN BARIS INI: Memaksa audio untuk diputar
+        btn.innerHTML = '🔊 Musik Aktif';
+        btn.classList.add('active'); 
+    } else {
+        video.muted = true;
+        // Boleh ditambah video.pause() di sini jika ingin lagunya berhenti saat di-mute
+        btn.innerHTML = '🔇 Musik Tidak Aktif';
+        btn.classList.remove('active'); 
+    }
+}
+
+    // ---------------------------------------------------------
+    // QUOTES SYSTEM
+    // ---------------------------------------------------------
+    const scenarioQuotes = [
+        { text: "Alah bisa karena biasa.", author: "Peribahasa" },
+        { text: "Anak geografi kok hilang arah.", author: "Just Kidding" },
+        { text: "Bumi adalah museum kehidupan kita.", author: "Prof. Dr. Suratman Worosuprodjo" },
+        { text: "But the sun is still in the sky and shining above you.", author: "Chiquitita - Abba" },
+        { text: "Different location, different problem. Different scale, different answer.", author: "Divisi Materi" },
+        { text: "Geography is the mother of all sciences.", author: "Eratosthenes" },
+        { text: "In nature, nothing exists alone.", author: "Rachel Carson" },
+        { text: "The map is not the territory.", author: "Alfred Korzybski" }
+    ];
+
+    let currentQuoteIndex = Math.floor(Math.random() * scenarioQuotes.length);
+    let quoteInterval;
+
+    function displayNextQuote() {
+        const quoteEl = document.getElementById('sys-quote');
+        const authorEl = document.getElementById('sys-author');
+        if (!quoteEl || !authorEl) return;
+
+        quoteEl.style.opacity = 0;
+        authorEl.style.opacity = 0;
+
+        setTimeout(() => {
+            const selected = scenarioQuotes[currentQuoteIndex];
+            quoteEl.innerText = `"` + selected.text + `"`;
+            authorEl.innerText = selected.author;
+            quoteEl.style.opacity = 1;
+            authorEl.style.opacity = 1;
+            currentQuoteIndex = (currentQuoteIndex + 1) % scenarioQuotes.length;
+        }, 500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        initBackgroundAndLoading();
+        loadChecklistState(); // Panggil fungsi load saat halaman pertama kali dirender
+        displayNextQuote();
+        quoteInterval = setInterval(displayNextQuote, 7500);
+    });
+</script>
+<script>
+// =========================================================
+// SCRIPT: INTERAKSI ZOOM GIF (LIGHTBOX) - VERSI REVISI
+// =========================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const gifs = document.querySelectorAll('.standalone-gif');
+    const overlay = document.getElementById('gif-overlay');
+
+    if (!overlay) return;
+
+    // Atur overlay agar elemen di dalamnya otomatis ke tengah
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+
+    // Event saat GIF diklik
+    gifs.forEach(gif => {
+        gif.addEventListener('click', () => {
+            // Ambil gambar dari GIF yang diklik
+            const imgElement = gif.querySelector('img');
+            if(!imgElement) return;
+
+            // Masukkan duplikat gambar tersebut ke dalam overlay hitam
+            overlay.innerHTML = `<img src="${imgElement.src}" style="width: 90vw; max-width: 1000px; border-radius: 8px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.5), 0 0 80px rgba(0, 229, 255, 0.2);">`;
+            
+            // Tampilkan layar hitam beserta gambar duplikatnya
+            overlay.classList.add('active');
+        });
+    });
+
+    // Event saat layar hitam atau gambar diklik (Tutup zoom)
+    overlay.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        
+        // Hapus duplikat gambar setelah animasi selesai
+        setTimeout(() => {
+            if (!overlay.classList.contains('active')) {
+                overlay.innerHTML = ''; 
+            }
+        }, 300);
+    });
+});
+</script>
+
+</body>
+</html>
